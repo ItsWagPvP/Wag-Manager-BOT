@@ -1,7 +1,9 @@
 require("dotenv").config()
 const { Client, Intents, Interaction, MessageActionRow, MessageButton } = require("discord.js")
 const ping = require("./commands/ping")
+const autoroles = require("./commands/autoroles")
 const verifygenerator = require("./commands/verifygenerator")
+const verifybutton = require("./events/verifybutton")
 const client = new Client({ intents: Object.values(Intents.FLAGS).reduce((a, b) => a | b), partials: ['REACTION', 'MESSAGE'] })
 
 let prefix = "."
@@ -24,41 +26,30 @@ client.on("ready", () => {
         description: 'Send the verifier message',
     })
 
+    commands.create({
+        name: 'reactionrole',
+        description: 'Send the autoroles message',
+    })
+
 })
 
 client.on("interactionCreate", async (interaction) => {
 
     if (interaction.isCommand()) {
         const { commandName, options } = interaction
+        if (commandName == "ping") ping.run(client, interaction)
+        else if (commandName == "verifygenerator") verifygenerator.run(interaction)
+        else if (commandName == "reactionrole") await autoroles.execute(client, interaction)
 
-        if (commandName == 'ping') {
-            ping.run(client, interaction)
-        } else if (commandName == 'verifygenerator') {
-            verifygenerator.run(interaction)
-        }
 
     } else if (interaction.isButton()) {
         switch (interaction.customId) {
-            case "verifybutton": {
-                const roleId = "887008981212622918"
-                const role = interaction.guild.roles.cache.get(roleId)
-
-                const member = interaction.member
-
-                member.roles.add(role)
-
-                interaction.reply({
-                    content: "Verified!",
-                    ephemeral: true,
-                })
-
-                break
-            }
+            case "verifybutton": verifybutton.run(interaction)
         }
     }
 
-
     //TODO assign command with notify
+
 })
 
 client.login(process.env.TOKEN)
