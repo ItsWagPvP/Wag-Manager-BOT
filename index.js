@@ -1,5 +1,7 @@
 require("dotenv").config()
 const { Client, Intents, Interaction, MessageActionRow, MessageButton } = require("discord.js")
+const ping = require("./commands/ping")
+const verifygenerator = require("./commands/verifygenerator")
 const client = new Client({ intents: Object.values(Intents.FLAGS).reduce((a, b) => a | b), partials: ['REACTION', 'MESSAGE'] })
 
 let prefix = "."
@@ -30,44 +32,11 @@ client.on("interactionCreate", async (interaction) => {
         const { commandName, options } = interaction
 
         if (commandName == 'ping') {
-            interaction.reply({
-                content: `Pong!\n:ping_pong: Latency is ${Date.now() - interaction.createdTimestamp}ms. API Latency is ${Math.round(client.ws.ping)}ms`,
-                ephemeral: false,
-            })
+            ping.run(client, interaction)
         } else if (commandName == 'verifygenerator') {
-
-            /**
-             *  @type {import("discord.js").GuildMember}
-            */
-            const member = interaction.member
-            const staffId = "852720760568283136"
-            if (!member.roles.cache.has(staffId)) {
-                interaction.reply({
-                    content: `You must be a staff member to use this!`,
-                    ephemeral: true,
-                })
-            } else {
-
-                let row = new MessageActionRow().addComponents(
-                    new MessageButton()
-                        .setCustomId("verifybutton")
-                        .setLabel("Verify")
-                        .setEmoji("966312438553255987")
-                        .setStyle("SUCCESS")
-                )
-
-                interaction.channel.send({
-                    content: "Verify yourself by clicking the following button",
-                    components: [row]
-                })
-
-                interaction.reply({
-                    content: `Done!`,
-                    ephemeral: true,
-                })
-
-            }
+            verifygenerator.run(interaction)
         }
+
     } else if (interaction.isButton()) {
         switch (interaction.customId) {
             case "verifybutton": {
